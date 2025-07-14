@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 import asyncpg
-from models.search import Query, SearchResponse, ResponseData, RelatedQuestionRequest, RelatedQuestionResponse
+from models.search import Query, SearchResponse, ResponseData, RelatedQuestionRequest, RelatedQuestionResponse, RecommendProductRequest, RecommendProductResponse
 from controllers.search_controller import SearchController
 from controllers.stream_controller import StreamController
 from database.connection import get_db
@@ -53,5 +53,12 @@ async def generate_related_question(
 ):
     related_questions = await SearchController.generate_related_question(request.question, request.context)
     return RelatedQuestionResponse(related_questions=related_questions)
+
+@router.post("/blog/recommend-product", response_model=RecommendProductResponse)
+async def recommend_product(
+    request: RecommendProductRequest
+):
+    result = await SearchController.recommend_product(request.context)
+    return RecommendProductResponse(**result)
 
 

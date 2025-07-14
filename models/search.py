@@ -37,3 +37,10 @@ class RelatedQuestionRequest(BaseModel):
 
 class RelatedQuestionResponse(BaseModel):
     related_questions: list[str]
+
+
+class RecommendProductRequest(BaseModel):
+    context: str = Field(..., min_length=3)
+
+class RecommendProductResponse(BaseModel):
+    recommended_products: list[str]

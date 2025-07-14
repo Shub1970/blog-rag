@@ -140,3 +140,37 @@ Your complete answer here
         except Exception as e:
             print(f"Error in generate_related_question: {e}")
             raise HTTPException(status_code=500, detail=str(e))
+
+    @staticmethod
+    async def recommend_product(context: str) -> dict:
+        try:
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            # Static product listing
+            static_product_list = (
+                "Product List (static):\n"
+                "plywood: Architect Ply, Club Prime, Classic Marine, Bond 710, Sainik 710, Win MR, Sainik MR, Century Film Face, Is 710\n"
+                "doors: Club Prime Doors, Bond Doors, Sainik Doors, Melamine Door Skin, White Primered Door, Century Laminated Doors, Century Veneered Doors, Sainik Laminated Doors, Sainik Builder Doors\n"
+                "laminate: Classy Wine, Smoke Green, Emerald Green, Frosty White, Silica Grey, Brazilian Sand, Pebble Ivory, Black, Mudpie, Classy Wine\n"
+            )
+            system_prompt = (
+                "You are an expert product recommender. Given a user's context, recommend a list of the best products to buy (not just one).\n"
+                "Output only a comma-separated list of product names, nothing else.\n\n"
+                f"{static_product_list}"
+            )
+            user_prompt = f"Context: {context}"
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ]
+            completion = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=messages,  # type: ignore
+                temperature=0.7,
+                max_tokens=256
+            )
+            response_content = completion.choices[0].message.content or ""
+            recommended_products = [p.strip() for p in response_content.split(",") if p.strip()]
+            return {"recommended_products": recommended_products}
+        except Exception as e:
+            print(f"Error in recommend_product: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
